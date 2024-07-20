@@ -438,7 +438,7 @@ fn compile_top_level_item_without_local_items<'a>(
                     .map(|variant| {
                         let name = variant.ident.name.to_string();
                         let fields = match &variant.data {
-                            VariantData::Struct(fields, _) => {
+                            VariantData::Struct { fields, .. } => {
                                 let fields = fields
                                     .iter()
                                     .map(|field| {
@@ -488,7 +488,7 @@ fn compile_top_level_item_without_local_items<'a>(
             let ty_params = get_ty_params(env, generics);
 
             match body {
-                VariantData::Struct(fields, _) => {
+                VariantData::Struct { fields, .. } => {
                     if fields.is_empty() {
                         return vec![Rc::new(TopLevelItem::TypeStructTuple {
                             name,
@@ -977,13 +977,6 @@ fn compile_generic_bounds(
         .filter_map(|generic_bound| match generic_bound {
             GenericBound::Trait(ptraitref, _) => {
                 Some(TraitBound::compile(env, local_def_id, ptraitref))
-            }
-            GenericBound::LangItemTrait { .. } => {
-                let warning_msg = "LangItem trait bounds are not supported yet.";
-                let note_msg = "It will change in the future.";
-                let span = &generic_bound.span();
-                emit_warning_with_note(env, span, warning_msg, Some(note_msg));
-                None
             }
             // we ignore lifetimes
             GenericBound::Outlives { .. } => None,

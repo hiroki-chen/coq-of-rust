@@ -17,10 +17,14 @@ pub(crate) fn emit_warning_with_note(
     let mut warn = env
         .tcx
         .sess
+        .dcx()
         .struct_span_warn(*span, warning_msg.to_string());
 
     match note_msg {
-        Some(note) => warn.note(note.to_string()).emit(),
+        Some(note) => {
+            warn.note(note.to_string());
+            warn.emit()
+        }
         None => warn.emit(),
     }
 }

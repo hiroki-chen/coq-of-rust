@@ -640,15 +640,10 @@ pub(crate) fn compile_expr<'a>(
                     let arm = thir.arms.get(*arm_id).unwrap();
                     let pattern = crate::thir_pattern::compile_pattern(env, &arm.pattern);
                     let if_let_guard = match &arm.guard {
-                        Some(guard) => match guard {
-                            thir::Guard::If(expr_id) => {
-                                get_if_conditions(env, generics, thir, expr_id)
-                            }
-                            thir::Guard::IfLet(pattern, expr_id) => vec![(
-                                crate::thir_pattern::compile_pattern(env, pattern),
-                                compile_expr(env, generics, thir, expr_id),
-                            )],
-                        },
+                        Some(expr_id) => vec![(
+                            crate::thir_pattern::compile_pattern(env, arm.pattern.as_ref()),
+                            compile_expr(env, generics, thir, expr_id),
+                        )],
                         None => vec![],
                     };
                     let body = compile_expr(env, generics, thir, &arm.body);
